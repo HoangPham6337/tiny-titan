@@ -2,8 +2,8 @@
 
 Tiny Titan is a side-scrolling action game where players control a hero battling waves of enemies while striving to achieve the highest score. The game features a dynamic environment, various tools, and challenging enemies.
 
-![Title Screen]("resources/screenshots/title_screen.png")
-![Game Play]("resources/screenshots/game_play.png")
+![Title Screen](resources/screenshots/title_screen.png)
+![Game Play](resources/screenshots/game_play.png)
 
 ## Table of Contents
 - [Features](#features)
