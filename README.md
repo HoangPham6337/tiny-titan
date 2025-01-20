@@ -70,6 +70,33 @@ Tiny Titan is a side-scrolling action game where players control a hero battling
 
 ## Development
 
+### Directory 
+
+```
+./
+│
+├── code/
+│
+└── resources/
+    │
+    ├── audio/
+    │
+    ├── background/
+    │
+    ├── button/
+    │
+    ├── enemies/
+    │
+    ├── fonts/
+    │
+    ├── icon/
+    │
+    ├── overlay/
+    │
+    └── player/
+```
+
+
 ### File Structure
 - **main.py**: Game entry point.
 - **player.py**: Player class and mechanics.
