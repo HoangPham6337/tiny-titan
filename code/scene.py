@@ -8,10 +8,8 @@ from overlay import Overlay
 from skeleton import Skeleton
 from bird import Bird
 from timer_counter import Timer
-from utilities import construct_dir, get_font, load_high_score
+from utilities import RESOURCES_PATH, get_font, load_high_score
 from settings import COLOR_PALETTE
-
-RESOURCE = construct_dir()[1]
 
 
 class Scene:
@@ -29,7 +27,7 @@ class Scene:
         self.background_positions: List[float] = []
         for i in range(4):
             bg_image = pygame.image.load(
-                os.path.join(RESOURCE, "background", f"BG-{i}.png")
+                os.path.join(RESOURCES_PATH, "background", f"BG-{i}.png")
             ).convert_alpha()
             if i != 0:
                 bg_image = pygame.transform.scale_by(bg_image, 0.5).convert_alpha()

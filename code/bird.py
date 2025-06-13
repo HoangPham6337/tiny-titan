@@ -5,11 +5,8 @@ from settings import GROUND_LEVEL
 from timer_counter import Timer
 from player import Player
 from typing import Dict, List, Optional
-from utilities import construct_dir, get_current_direction, extract_frames
+from utilities import RESOURCES_PATH, get_current_direction, extract_frames
 from settings import EnemyStates
-
-
-RESOURCES = construct_dir()[1]
 
 
 class Bird(pygame.sprite.Sprite):
@@ -21,9 +18,11 @@ class Bird(pygame.sprite.Sprite):
         speed: Optional[float] = None,
     ):
         super().__init__(group)
-        enemy_sprite_path = os.path.join(RESOURCES, "enemies", "bird.png")
+        enemy_sprite_path = os.path.join(RESOURCES_PATH, "enemies", "bird.png")
         enemy_sprite_sheet = pygame.image.load(enemy_sprite_path)
-        self.frames: List[pygame.Surface] = extract_frames(enemy_sprite_sheet, 68, 68, 3)
+        self.frames: List[pygame.Surface] = extract_frames(
+            enemy_sprite_sheet, 68, 68, 3
+        )
 
         self.channel = pygame.mixer.Channel(4)
         self.state: str = EnemyStates.MOVE_LEFT.value
@@ -41,7 +40,7 @@ class Bird(pygame.sprite.Sprite):
         self.timers = {
             "hit_timer": Timer(1300),
             "death_timer": Timer(900),
-            "damage_timer": Timer(1200)
+            "damage_timer": Timer(1200),
         }
 
     def animate(self, delta_time: float) -> None:
@@ -59,13 +58,14 @@ class Bird(pygame.sprite.Sprite):
             # Account for the differences in surface size
             self.rect = self.image.get_rect(center=self.rect.center)
         except IndexError:
-            print(f"Frame missed: {self.current_frame}\nPlayer state: {self.state}")
+            print(f"Frame missed: {
+                  self.current_frame}\nPlayer state: {self.state}")
         except KeyError:
             print(f"Critical error. No frame found. Missing: {self.state}")
 
     def change_status(self) -> None:
         if not self.timers["hit_timer"].active:
-            self.state = f"move_left"
+            self.state = "move_left"
         if self.world_position.x < -10:
             self.state = "death_left"
         if self.health <= 0:
@@ -73,15 +73,22 @@ class Bird(pygame.sprite.Sprite):
             self.state = f"death_{direction}"
 
     def damage_player_if_close(self, player: Player):
-        distance = pygame.math.Vector2(self.rect.center).distance_to(player.rect.center)
-        if distance < 40: 
-            if not self.timers["damage_timer"].active and not self.timers["hit_timer"].active:
+        distance = pygame.math.Vector2(
+            self.rect.center).distance_to(player.rect.center)
+        if distance < 40:
+            if (
+                not self.timers["damage_timer"].active
+                and not self.timers["hit_timer"].active
+            ):
                 player.health -= 5
                 player.timers["shake_timer"].activate()
                 self.timers["damage_timer"].activate()
                 self.channel.set_volume(0.5)
-                self.channel.play(pygame.mixer.Sound(os.path.join(RESOURCES, "audio", "hurt.mp3")))
-                
+                self.channel.play(
+                    pygame.mixer.Sound(os.path.join(
+                        RESOURCES_PATH, "audio", "hurt.mp3"))
+                )
+
     def take_damage(self, amount: int):
         if self.timers["death_timer"].active:
             return
@@ -95,11 +102,11 @@ class Bird(pygame.sprite.Sprite):
         delta_time: float,
         player_state: str,
     ):
-
-        speed_multiplier = 0.5 if get_current_direction(player_state) == "left" else 1.0
+        speed_multiplier = 0.5 if get_current_direction(
+            player_state) == "left" else 1.0
 
         # Move the enemy
-        self.world_position.x -= (self.speed * delta_time * speed_multiplier)
+        self.world_position.x -= self.speed * delta_time * speed_multiplier
         self.rect.center = self.world_position  # type: ignore
 
     def die(self) -> None:
@@ -110,10 +117,7 @@ class Bird(pygame.sprite.Sprite):
         for timer in self.timers.values():
             timer.update()
 
-    def update(
-        self, player_state: str, delta_time: float
-    ):
-        
+    def update(self, player_state: str, delta_time: float):
         self.position_calculator(delta_time, player_state)
         self.animate(delta_time)
         self.change_status()

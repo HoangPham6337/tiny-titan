@@ -1,11 +1,35 @@
-import pygame
 import os
-from typing import List, Dict
+import sys
+from typing import Dict, List
+
+import pygame
 from settings import GROUND_LEVEL
+
+
+def _get_base_paths():
+    """Determines the correct base and resource paths based on frozen status."""
+    if getattr(sys, 'frozen', False):
+        # We are running inside a PyInstaller bundle
+        # sys._MEIPASS is the path to the temporary folder where PyInstaller extracted everything
+        bundle_root = sys._MEIPASS
+        # We configured PyInstaller with --add-data "resources:resources"
+        # so the resources folder is directly under the bundle_root
+        resource_dir = os.path.join(bundle_root, "resources")
+        return bundle_root, resource_dir
+    else:
+        # We are running in a normal Python environment (e.g., from terminal)
+        # Navigate up two levels from code/utilities.py to get to the project root
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        resource_dir = os.path.join(base_dir, "resources")
+        return base_dir, resource_dir
+
+
+BASE_GAME_PATH, RESOURCES_PATH = _get_base_paths()
+
 
 def get_font(size: int) -> pygame.font.Font:
     return pygame.font.Font(
-        os.path.join(construct_dir()[1], "fonts", "VCR_OSD_MONO_1.ttf"), size
+        os.path.join(RESOURCES_PATH, "fonts", "VCR_OSD_MONO_1.ttf"), size
     )
 
 
@@ -14,7 +38,7 @@ def flip_helper_vertical(
 ) -> List[pygame.Surface]:
     return [
         pygame.transform.flip(frame, True, False)
-        for frame in frames[range[0] : range[1]]
+        for frame in frames[range[0]: range[1]]
     ]
 
 
@@ -39,17 +63,38 @@ def extract_frames(
             frames.append(frame)
     return frames
 
+
+def get_high_score_path():
+    if getattr(sys, "frozen", False):
+        return os.path.join(os.path.dirname(sys.executable))
+    else:
+        return os.path.join(construct_dir()[1], "high_score.txt")
+
+
 def load_high_score():
     high_score_file = os.path.join(construct_dir()[1], "high_score.txt")
+    if getattr(sys, 'frozen', False):
+        high_score_file = os.path.join(os.path.dirname(sys.executable), "high_score.txt")
+    else:
+        high_score_file = os.path.join(RESOURCES_PATH, "high_score.txt")
+
     if os.path.exists(high_score_file):
         with open(high_score_file, "r") as file:
-            return int(file.read().strip())
+            try:
+                return int(file.read().strip())
+            except ValueError:
+                return 0
     return 0
 
+
 def save_high_score(high_score):
-    high_score_file = os.path.join(construct_dir()[1], "high_score.txt")
+    if getattr(sys, 'frozen', False):
+        high_score_file = os.path.join(os.path.dirname(sys.executable), "high_score.txt")
+    else:
+        high_score_file = os.path.join(RESOURCES_PATH, "high_score.txt")
     with open(high_score_file, "w") as file:
         file.write(str(high_score))
+
 
 def construct_dir() -> List[str]:
     """
@@ -76,8 +121,7 @@ def extract_frames_character(
     frames: List[pygame.Surface] = extract_frames(
         sprite_sheet, frame_width, frame_height, resize_factor
     )
-    RESOURCES = construct_dir()[1]
-    jump = pygame.image.load(os.path.join(RESOURCES, "player", "jump.png"))
+    jump = pygame.image.load(os.path.join(RESOURCES_PATH, "player", "jump.png"))
     jump = pygame.transform.scale_by(jump, resize_factor)
     animation_frames: Dict[str, List[pygame.Surface]] = {
         "idle_right": frames[6:12],
@@ -94,6 +138,7 @@ def extract_frames_character(
 
     return animation_frames
 
+
 def extract_frames_skeleton(
     sprite_sheet: pygame.Surface,
     frame_width: int,
@@ -106,8 +151,7 @@ def extract_frames_skeleton(
     frames: List[pygame.Surface] = extract_frames(
         sprite_sheet, frame_width, frame_height, resize_factor
     )
-    RESOURCES = construct_dir()[1]
-    jump = pygame.image.load(os.path.join(RESOURCES, "player", "jump.png"))
+    jump = pygame.image.load(os.path.join(RESOURCES_PATH, "player", "jump.png"))
     jump = pygame.transform.scale_by(jump, resize_factor)
     animation_frames: Dict[str, List[pygame.Surface]] = {
         "idle_right": frames[6:12],
@@ -117,7 +161,7 @@ def extract_frames_skeleton(
         "death_right": frames[36:40],
         "death_left": flip_helper_vertical(frames, (36, 42)),
         "hit_right": frames[48:52],
-        "hit_left": flip_helper_vertical(frames, (48, 52))
+        "hit_left": flip_helper_vertical(frames, (48, 52)),
     }
 
     return animation_frames
@@ -164,13 +208,13 @@ def extract_overlay_tool(
     """
     This function will extract the individual sprite from an asset of multiple sprites.
     """
-    RESOURCE_DIR = construct_dir()[1]
-    overlay_sprite_path = os.path.join(RESOURCE_DIR, "overlay", "tools.png")
-    overlay_sprite_sheet = pygame.image.load(overlay_sprite_path).convert_alpha()
+    overlay_sprite_path = os.path.join(RESOURCES_PATH, "overlay", "tools.png")
+    overlay_sprite_sheet = pygame.image.load(
+        overlay_sprite_path).convert_alpha()
     tool_frames: List[pygame.Surface] = extract_frames(
         overlay_sprite_sheet, frame_width, frame_height, resize_factor
     )
-    health_frame_path = os.path.join(RESOURCE_DIR, "overlay", "health.png") 
+    health_frame_path = os.path.join(RESOURCES_PATH, "overlay", "health.png")
     overlay_sprite_sheet = pygame.image.load(health_frame_path).convert_alpha()
     health_frames: List[pygame.Surface] = extract_frames(
         overlay_sprite_sheet, 32, 32, 4
@@ -181,10 +225,11 @@ def extract_overlay_tool(
         "axe": tool_frames[3],
         "sword": tool_frames[4],
         "shovel": tool_frames[5],
-        "health": health_frames[2]
+        "health": health_frames[2],
     }
     return overlay_surfaces
 
 
 def is_on_ground(y: float) -> bool:
     return abs(y - GROUND_LEVEL) < 1e-3
+

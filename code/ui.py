@@ -3,13 +3,12 @@ import os
 import sys
 from button import Button
 from settings import CENTER_SCREEN, COLOR_PALETTE, MAX_FRAME_RATE, WINDOW_HEIGHT
-from utilities import get_font, construct_dir, load_high_score, save_high_score
+from utilities import get_font, load_high_score, save_high_score, RESOURCES_PATH
 from scene import Scene
 from player import Player
 
-RESOURCES = construct_dir()[1]
 button_background: pygame.Surface = pygame.image.load(
-os.path.join(RESOURCES, "button", "button_background.png")
+os.path.join(RESOURCES_PATH, "button", "button_background.png")
 )
 button_background = pygame.transform.scale_by(button_background, 0.4)
 
@@ -25,7 +24,7 @@ def play(screen: pygame.Surface, background: pygame.Surface, score: int) -> None
 
         scene.run(delta_time)
         button_background: pygame.Surface = pygame.image.load(
-            os.path.join(RESOURCES, "button", "button_background.png")
+            os.path.join(RESOURCES_PATH, "button", "button_background.png")
         )
         button_background = pygame.transform.scale_by(button_background, 0.2)
         play_back = Button(
@@ -58,7 +57,7 @@ def main_menu(screen: pygame.Surface, background: pygame.Surface, score: int) ->
         screen.blit(background, (0, 0))
         mouse_pos = pygame.mouse.get_pos()
         menu_font = pygame.font.Font(
-            os.path.join(construct_dir()[1], "fonts", "gumball.ttf"), 100
+            os.path.join(RESOURCES_PATH, "fonts", "gumball.ttf"), 100
         )
         menu_text = menu_font.render("TINY TITAN", False, COLOR_PALETTE[5])
         menu_rect = menu_text.get_rect(center=(CENTER_SCREEN[0], 100))

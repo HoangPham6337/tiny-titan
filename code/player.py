@@ -10,15 +10,12 @@ from settings import (
     PlayerStates
 )
 from utilities import (
-    construct_dir,
+    RESOURCES_PATH,
     extract_frames_character,
     extract_frames_tool,
     get_current_direction,
     is_on_ground
 )
-
-
-RESOURCES = construct_dir()[1]
 
 
 class Player(pygame.sprite.Sprite):
@@ -27,7 +24,7 @@ class Player(pygame.sprite.Sprite):
         self.channel = pygame.mixer.Channel(1)
         self.channel.set_volume(1)
         # Set up resources
-        player_sprite_path = os.path.join(RESOURCES, "player", "player.png")
+        player_sprite_path = os.path.join(RESOURCES_PATH, "player", "player.png")
         player_sprite_sheet = pygame.image.load(player_sprite_path).convert_alpha()
 
         self.frames: Dict[str, List[pygame.Surface]] = extract_frames_character(
@@ -36,7 +33,7 @@ class Player(pygame.sprite.Sprite):
         if len(self.frames) < 4:
             raise Exception("Critical Error. Failed to extract sprite.")
 
-        actions_sprite_path = os.path.join(RESOURCES, "player", "player_actions.png")
+        actions_sprite_path = os.path.join(RESOURCES_PATH, "player", "player_actions.png")
         action_sprite_sheet = pygame.image.load(actions_sprite_path).convert_alpha()
         self.action_frames: Dict[str, List[pygame.Surface]] = extract_frames_tool(
             action_sprite_sheet, 48, 48, 4.7
@@ -79,10 +76,10 @@ class Player(pygame.sprite.Sprite):
         }
 
         self.tool_sound = {
-            "pickaxe": pygame.mixer.Sound(os.path.join(RESOURCES, "audio", "axe.mp3")),
-            "axe": pygame.mixer.Sound(os.path.join(RESOURCES, "audio", "axe.mp3")),
-            "shovel": pygame.mixer.Sound(os.path.join(RESOURCES, "audio", "shovel.mp3")),
-            "sword": pygame.mixer.Sound(os.path.join(RESOURCES, "audio", "sword.mp3"))
+            "pickaxe": pygame.mixer.Sound(os.path.join(RESOURCES_PATH, "audio", "axe.mp3")),
+            "axe": pygame.mixer.Sound(os.path.join(RESOURCES_PATH, "audio", "axe.mp3")),
+            "shovel": pygame.mixer.Sound(os.path.join(RESOURCES_PATH, "audio", "shovel.mp3")),
+            "sword": pygame.mixer.Sound(os.path.join(RESOURCES_PATH, "audio", "sword.mp3"))
         }
 
         # Timer
@@ -260,7 +257,7 @@ class Player(pygame.sprite.Sprite):
         for enemy in enemies:
             distance = pygame.math.Vector2(self.rect.center).distance_to(enemy.rect.center)
             if distance <= weapon_range:
-                pygame.mixer.Channel(2).play(pygame.mixer.Sound(os.path.join(RESOURCES, "audio", "hit.mp3")))
+                pygame.mixer.Channel(2).play(pygame.mixer.Sound(os.path.join(RESOURCES_PATH, "audio", "hit.mp3")))
 
                 enemy.take_damage(damage)
 

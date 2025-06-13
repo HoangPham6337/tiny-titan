@@ -5,11 +5,8 @@ from settings import GROUND_LEVEL
 from timer_counter import Timer
 from player import Player
 from typing import Dict, List, Optional
-from utilities import construct_dir, extract_frames_skeleton, get_current_direction
+from utilities import RESOURCES_PATH, extract_frames_skeleton, get_current_direction
 from settings import EnemyStates
-
-
-RESOURCES = construct_dir()[1]
 
 
 class Skeleton(pygame.sprite.Sprite):
@@ -22,7 +19,7 @@ class Skeleton(pygame.sprite.Sprite):
         speed: Optional[float] = None,
     ):
         super().__init__(group)
-        enemy_sprite_path = os.path.join(RESOURCES, "enemies", "skeleton.png")
+        enemy_sprite_path = os.path.join(RESOURCES_PATH, "enemies", "skeleton.png")
         enemy_sprite_sheet = pygame.image.load(enemy_sprite_path)
         self.frames: Dict[str, List[pygame.Surface]] = extract_frames_skeleton(
             enemy_sprite_sheet, 32, 32, 5
@@ -82,7 +79,7 @@ class Skeleton(pygame.sprite.Sprite):
         if distance < 20: 
             if not self.timers["damage_timer"].active and not self.timers["hit_timer"].active:
                 self.channel.set_volume(0.5)
-                self.channel.play(pygame.mixer.Sound(os.path.join(RESOURCES, "audio", "hurt.mp3")))
+                self.channel.play(pygame.mixer.Sound(os.path.join(RESOURCES_PATH, "audio", "hurt.mp3")))
                 player.health -= 20
                 player.timers["shake_timer"].activate()
                 self.timers["damage_timer"].activate()
